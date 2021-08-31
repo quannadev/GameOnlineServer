@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "36jyXebqVT5yud2AKl12UQtq9+zEvanevLYhFHiN9cY6YXg8YE71mCMhs2wsT2qBphwB7XVJnxIqsWIJVHnazg==",
+  "success": true,
+  "projectFilePath": "/Volumes/Workspace/GameServer/Youtube-GameOnlineServer/Youtube-GameOnlineServer/Youtube-GameOnlineServer.csproj",
+  "expectedPackageFiles": [
+    "/Users/nguyenquan/.nuget/packages/netcoreserver/5.1.0/netcoreserver.5.1.0.nupkg.sha512"
+  ],
+  "logs": []
+}
