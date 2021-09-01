@@ -9,7 +9,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
     public class PlayersManager : IPlayerManager
     {
         public ConcurrentDictionary<string, IPlayer> Players { get; set; }
-
+        
         public PlayersManager()
         {
             Players = new ConcurrentDictionary<string, IPlayer>();

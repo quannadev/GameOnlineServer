@@ -2,6 +2,8 @@ using System;
 using System.Text;
 using NetCoreServer;
 using Youtube_GameOnlineServer.Applications.Interfaces;
+using Youtube_GameOnlineServer.Applications.Messaging;
+using Youtube_GameOnlineServer.Applications.Messaging.Constants;
 
 namespace Youtube_GameOnlineServer.Applications.Handlers
 {
@@ -19,6 +21,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         public override void OnWsConnected(HttpRequest request)
         {
             //todo login on player connected
+            var url = request.Url;
             Console.WriteLine("Player connected");
             IsDisconnected = false;
         }
@@ -33,8 +36,32 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         public override void OnWsReceived(byte[] buffer, long offset, long size)
         {
             var mess = Encoding.UTF8.GetString(buffer, (int) offset, (int) size);
-            Console.WriteLine($"Client {SessionId} send message {mess}");
-            ((WsGameServer) Server).SendAll($"{this.SessionId} send message {mess}");
+            try
+            {
+                var wsMess = GameHelper.ParseStruct<WsMessage<object>>(mess);
+                switch (wsMess.Tags)
+                {
+                    case WsTags.Invalid:
+                        break;
+                    case WsTags.Login:
+                        var loginData = GameHelper.ParseStruct<LoginData>(wsMess.Data.ToString());
+                        var x = 10;
+                        break;
+                    case WsTags.Register:
+                        break;
+                    case WsTags.Lobby:
+                        break;
+                    default:
+                        break;
+                        //throw new ArgumentOutOfRangeException();
+                }
+            }
+            catch (Exception e)
+            {
+                //todo send invalid message 
+                Console.WriteLine(e);
+            }
+            //((WsGameServer) Server).SendAll($"{this.SessionId} send message {mess}");
         }
 
         public void SetDisconnect(bool value)

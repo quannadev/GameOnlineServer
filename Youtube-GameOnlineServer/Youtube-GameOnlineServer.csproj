@@ -9,11 +9,22 @@
 
     <ItemGroup>
       <PackageReference Include="NetCoreServer" Version="5.1.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Messaging" />
-      <Folder Include="Room" />
+      <Compile Remove="Messaging\**" />
+      <Compile Remove="Room\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Messaging\**" />
+      <EmbeddedResource Remove="Room\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Messaging\**" />
+      <None Remove="Room\**" />
     </ItemGroup>
 
 </Project>
