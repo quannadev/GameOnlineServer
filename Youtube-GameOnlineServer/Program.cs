@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using Youtube_GameOnlineServer.Applications.Handlers;
+using Youtube_GameOnlineServer.Applications.Interfaces;
 
 namespace Youtube_GameOnlineServer
 {
@@ -8,7 +9,8 @@ namespace Youtube_GameOnlineServer
     {
         static void Main(string[] args)
         {
-            var wsServer = new WsGameServer(IPAddress.Any, 8080);
+            IPlayerManager playerManager = new PlayersManager();
+            var wsServer = new WsGameServer(IPAddress.Any, 8080, playerManager);
             wsServer.StartServer();
             for (;;)
             {
