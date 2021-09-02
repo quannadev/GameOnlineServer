@@ -3,15 +3,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Youtube_GameOnlineServer.Applications.Interfaces;
+using Youtube_GameOnlineServer.Logging;
 
 namespace Youtube_GameOnlineServer.Applications.Handlers
 {
     public class PlayersManager : IPlayerManager
     {
         public ConcurrentDictionary<string, IPlayer> Players { get; set; }
-        
-        public PlayersManager()
+        private readonly IGameLogger _logger;
+        public PlayersManager(IGameLogger logger)
         {
+            _logger = logger;
             Players = new ConcurrentDictionary<string, IPlayer>();
         }
         public void AddPlayer(IPlayer player)
@@ -19,7 +21,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             if (FindPlayer(player) == null)
             {
                 Players.TryAdd(player.SessionId, player);
-                Console.WriteLine($"List Players {Players.Count}");
+                _logger.Info($"List Players {Players.Count}");
             }
             
         }
@@ -31,8 +33,8 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                 Players.TryRemove(id, out var player);
                 if (player != null)
                 {
-                    Console.WriteLine($"Remove {id} success");
-                    Console.WriteLine($"List Players {Players.Count}");
+                    _logger.Info($"Remove {id} success");
+                    _logger.Info($"List Players {Players.Count}");
                 }
             }
         }

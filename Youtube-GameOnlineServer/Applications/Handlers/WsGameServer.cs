@@ -1,38 +1,44 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using GameDatabase.Mongodb.Handlers;
 using NetCoreServer;
 using Youtube_GameOnlineServer.Applications.Interfaces;
+using Youtube_GameOnlineServer.Logging;
 
 namespace Youtube_GameOnlineServer.Applications.Handlers
 {
     public class WsGameServer: WsServer, IWsGameServer
     {
         private readonly int _port;
-        public readonly IPlayerManager PlayerManager;
-        public WsGameServer(IPAddress address, int port, IPlayerManager playerManager) : base(address, port)
+        private readonly IPlayerManager _playerManager;
+        private readonly IGameLogger _logger;
+        private readonly MongoDb _mongoDb;
+        public WsGameServer(IPAddress address, int port, IPlayerManager playerManager, IGameLogger logger, MongoDb mongoDb) : base(address, port)
         {
             _port = port;
-            PlayerManager = playerManager;
+            _playerManager = playerManager;
+            _logger = logger;
+            _mongoDb = mongoDb;
         }
 
         protected override TcpSession CreateSession()
         {
             //todo handle new session
-            Console.WriteLine("New Session connected");
-            var player = new Player(this);
-            PlayerManager.AddPlayer(player);
+            _logger.Info("New Session connected");
+            var player = new Player(this, _mongoDb.GetDatabase());
+            _playerManager.AddPlayer(player);
             return player;
         }
 
         protected override void OnDisconnected(TcpSession session)
         {
-            Console.WriteLine("Session disconnected");
-            var player = PlayerManager.FindPlayer(session.Id.ToString());
+            _logger.Info("Session disconnected");
+            var player = _playerManager.FindPlayer(session.Id.ToString());
             if (player != null)
             {
                 //player.SetDisconnect(true);
-                PlayerManager.RemovePlayer(player);
+                _playerManager.RemovePlayer(player);
                 //todo mark player disconnected
             }
             base.OnDisconnected(session);
@@ -48,7 +54,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             //todo logic before start server
             if (this.Start())
             {
-                Console.WriteLine($"Server Ws started at {_port}");
+                _logger.Print($"Server Ws started at {_port}");
                 return;
             }
             
@@ -56,7 +62,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
 
         protected override void OnError(SocketError error)
         {
-            Console.WriteLine($"Server Ws error");
+            _logger.Error($"Server Ws error");
             base.OnError(error);
         }
 
@@ -64,12 +70,16 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         {
             //todo logic before stop server
             this.Stop();
+            _logger.Print("Server Ws stopped");
         }
 
         public void RestartServer()
         {
             //todo logic before stop server
-            this.Restart();
+            if (this.Restart())
+            {
+                _logger.Print("Server Ws restarted");
+            }
         }
     }
 }

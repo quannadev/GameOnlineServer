@@ -1,0 +1,12 @@
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/bin/Debug/net5.0/GameDatabase.deps.json
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/bin/Debug/net5.0/GameDatabase.dll
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/bin/Debug/net5.0/GameDatabase.pdb
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/GameDatabase.csproj.AssemblyReference.cache
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/GameDatabase.GeneratedMSBuildEditorConfig.editorconfig
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/GameDatabase.AssemblyInfoInputs.cache
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/GameDatabase.AssemblyInfo.cs
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/GameDatabase.csproj.CoreCompileInputs.cache
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/GameDatabase.dll
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/refint/GameDatabase.dll
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/GameDatabase.pdb
+/Volumes/Workspace/GameServer/GameOnlineServer/GameDatabase/obj/Debug/net5.0/ref/GameDatabase.dll

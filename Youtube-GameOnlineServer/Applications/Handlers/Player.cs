@@ -1,9 +1,14 @@
 using System;
 using System.Text;
+using GameDatabase.Mongodb.Handlers;
+using GameDatabase.Mongodb.Interfaces;
+using MongoDB.Driver;
 using NetCoreServer;
 using Youtube_GameOnlineServer.Applications.Interfaces;
 using Youtube_GameOnlineServer.Applications.Messaging;
 using Youtube_GameOnlineServer.Applications.Messaging.Constants;
+using Youtube_GameOnlineServer.GameModels;
+using Youtube_GameOnlineServer.Logging;
 
 namespace Youtube_GameOnlineServer.Applications.Handlers
 {
@@ -12,17 +17,21 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         public string SessionId { get; set; }
         public string Name { get; set; }
         private bool IsDisconnected { get; set; }
-        public Player(WsServer server) : base(server)
+        private readonly IGameLogger _logger;
+        private IGameDB<User> UsersDb { get; set; }
+        public Player(WsServer server, IMongoDatabase database) : base(server)
         {
             SessionId = this.Id.ToString();
             IsDisconnected = false;
+            _logger = new GameLogger();
+            UsersDb = new MongoHandler<User>(database);
         }
 
         public override void OnWsConnected(HttpRequest request)
         {
             //todo login on player connected
             var url = request.Url;
-            Console.WriteLine("Player connected");
+            _logger.Info("Player connected");
             IsDisconnected = false;
         }
 
@@ -45,7 +54,8 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                         break;
                     case WsTags.Login:
                         var loginData = GameHelper.ParseStruct<LoginData>(wsMess.Data.ToString());
-                        var x = 10;
+                        var user = new User("codephui", "abcg@123", "Admin");
+                        var newUser = UsersDb.Create(user);
                         break;
                     case WsTags.Register:
                         break;
@@ -58,8 +68,8 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             }
             catch (Exception e)
             {
+                _logger.Error("OnWsReceived error", e);
                 //todo send invalid message 
-                Console.WriteLine(e);
             }
             //((WsGameServer) Server).SendAll($"{this.SessionId} send message {mess}");
         }
@@ -77,7 +87,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         public void OnDisconnect()
         {
            //todo logic handle player disconnect
-           Console.WriteLine("Player disconnected");
+           _logger.Warning("Player disconnected", null);
            //((WsGameServer) Server).PlayerManager.RemovePlayer(this);
         }
     }

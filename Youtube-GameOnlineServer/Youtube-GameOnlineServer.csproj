@@ -10,6 +10,11 @@
     <ItemGroup>
       <PackageReference Include="NetCoreServer" Version="5.1.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="Serilog" Version="2.10.0" />
+      <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+      <PackageReference Include="Serilog.Settings.Configuration" Version="3.2.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+      <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,6 +30,10 @@
     <ItemGroup>
       <None Remove="Messaging\**" />
       <None Remove="Room\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GameDatabase\GameDatabase.csproj" />
     </ItemGroup>
 
 </Project>
