@@ -5,6 +5,8 @@ using Youtube_GameOnlineServer.Applications.Handlers;
 using Youtube_GameOnlineServer.Applications.Interfaces;
 using Youtube_GameOnlineServer.GameModels;
 using Youtube_GameOnlineServer.Logging;
+using Youtube_GameOnlineServer.Rooms.Handlers;
+using Youtube_GameOnlineServer.Rooms.Interfaces;
 
 namespace Youtube_GameOnlineServer
 {
@@ -15,7 +17,8 @@ namespace Youtube_GameOnlineServer
             IGameLogger logger = new GameLogger();
             var mongodb = new MongoDb();
             IPlayerManager playerManager = new PlayersManager(logger);
-            var wsServer = new WsGameServer(IPAddress.Any, 8080, playerManager, logger, mongodb);
+            IRoomManager roomManager = new RoomManager();
+            var wsServer = new WsGameServer(IPAddress.Any, 8080, playerManager, logger, mongodb, roomManager);
             wsServer.StartServer();
             logger.Print("Game Server started");
             for (;;)

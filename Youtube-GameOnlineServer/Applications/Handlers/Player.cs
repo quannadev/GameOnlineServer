@@ -8,6 +8,7 @@ using Youtube_GameOnlineServer.Applications.Interfaces;
 using Youtube_GameOnlineServer.Applications.Messaging;
 using Youtube_GameOnlineServer.Applications.Messaging.Constants;
 using Youtube_GameOnlineServer.GameModels;
+using Youtube_GameOnlineServer.GameModels.Handlers;
 using Youtube_GameOnlineServer.Logging;
 
 namespace Youtube_GameOnlineServer.Applications.Handlers
@@ -18,13 +19,15 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         public string Name { get; set; }
         private bool IsDisconnected { get; set; }
         private readonly IGameLogger _logger;
-        private IGameDB<User> UsersDb { get; set; }
+        private UserHandler UsersDb { get; set; }
+        private User UserInfo { get; set; }
+
         public Player(WsServer server, IMongoDatabase database) : base(server)
         {
             SessionId = this.Id.ToString();
             IsDisconnected = false;
             _logger = new GameLogger();
-            UsersDb = new MongoHandler<User>(database);
+            UsersDb = new UserHandler(database);
         }
 
         public override void OnWsConnected(HttpRequest request)
@@ -54,16 +57,55 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                         break;
                     case WsTags.Login:
                         var loginData = GameHelper.ParseStruct<LoginData>(wsMess.Data.ToString());
-                        var user = new User("codephui", "abcg@123", "Admin");
-                        var newUser = UsersDb.Create(user);
+                        UserInfo = UsersDb.FindByUserName(loginData.Username);
+                        if (UserInfo != null)
+                        {
+                            var hashPass = GameHelper.HashPassword(loginData.Password);
+                            if (hashPass == UserInfo.Password)
+                            {
+                                //todo move user to lobby
+                                var messInfo = new WsMessage<UserInfo>(WsTags.UserInfo, this.GetUserInfo());
+                                this.SendMessage(messInfo);
+                                this.PlayerJoinLobby();
+                                return;
+                            }
+                        }
+
+                        var invalidMess = new WsMessage<string>(WsTags.Invalid, "Username Or Password is Invalid");
+                        this.SendMessage(GameHelper.ParseString(invalidMess));
                         break;
                     case WsTags.Register:
+                        var regData = GameHelper.ParseStruct<RegisterData>(wsMess.Data.ToString());
+                        if (UserInfo != null)
+                        {
+                            invalidMess = new WsMessage<string>(WsTags.Invalid, "You are Loginned");
+                            this.SendMessage(GameHelper.ParseString(invalidMess));
+                            return;
+                        }
+                        var check = UsersDb.FindByUserName(regData.Username);
+                        if (check != null)
+                        {
+                            invalidMess = new WsMessage<string>(WsTags.Invalid, "Username exits");
+                            this.SendMessage(GameHelper.ParseString(invalidMess));
+                            return;
+                        }
+
+                       
+
+                        var newUser = new User(regData.Username, regData.Password, regData.DisplayName);
+                        UserInfo = UsersDb.Create(newUser);
+                        if (UserInfo != null)
+                        {
+                            //todo move user to lobby
+                            this.PlayerJoinLobby();
+                        }
+
                         break;
-                    case WsTags.Lobby:
+                    case WsTags.RoomInfo:
                         break;
                     default:
                         break;
-                        //throw new ArgumentOutOfRangeException();
+                    //throw new ArgumentOutOfRangeException();
                 }
             }
             catch (Exception e)
@@ -74,6 +116,13 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             //((WsGameServer) Server).SendAll($"{this.SessionId} send message {mess}");
         }
 
+        private void PlayerJoinLobby()
+        {
+            var lobby = ((WsGameServer) Server).RoomManager.Lobby;
+            lobby.JoinRoom(this);
+            //todo logic join lobby
+        }
+
         public void SetDisconnect(bool value)
         {
             this.IsDisconnected = value;
@@ -81,14 +130,38 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
 
         public bool SendMessage(string mes)
         {
-           return this.SendTextAsync(mes);
+            return this.SendTextAsync(mes);
+        }
+
+        public bool SendMessage<T>(WsMessage<T> message)
+        {
+            var mes = GameHelper.ParseString(message);
+            return this.SendMessage(mes);
         }
 
         public void OnDisconnect()
         {
-           //todo logic handle player disconnect
-           _logger.Warning("Player disconnected", null);
-           //((WsGameServer) Server).PlayerManager.RemovePlayer(this);
+            //todo logic handle player disconnect
+            var lobby = ((WsGameServer) Server).RoomManager.Lobby;
+            lobby.ExitRoom(this);
+            _logger.Warning("Player disconnected", null);
+            //((WsGameServer) Server).PlayerManager.RemovePlayer(this);
+        }
+
+        public UserInfo GetUserInfo()
+        {
+            if (UserInfo != null)
+            {
+                return new UserInfo
+                {
+                    DisplayName = UserInfo.DisplayName,
+                    Amount = UserInfo.Amount,
+                    Avatar = UserInfo.Avatar,
+                    Level = UserInfo.Level,
+                };
+            }
+
+            return new UserInfo();
         }
     }
 }

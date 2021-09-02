@@ -5,6 +5,7 @@ using GameDatabase.Mongodb.Handlers;
 using NetCoreServer;
 using Youtube_GameOnlineServer.Applications.Interfaces;
 using Youtube_GameOnlineServer.Logging;
+using Youtube_GameOnlineServer.Rooms.Interfaces;
 
 namespace Youtube_GameOnlineServer.Applications.Handlers
 {
@@ -14,12 +15,14 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         private readonly IPlayerManager _playerManager;
         private readonly IGameLogger _logger;
         private readonly MongoDb _mongoDb;
-        public WsGameServer(IPAddress address, int port, IPlayerManager playerManager, IGameLogger logger, MongoDb mongoDb) : base(address, port)
+        public readonly IRoomManager RoomManager;
+        public WsGameServer(IPAddress address, int port, IPlayerManager playerManager, IGameLogger logger, MongoDb mongoDb, IRoomManager roomManager) : base(address, port)
         {
             _port = port;
             _playerManager = playerManager;
             _logger = logger;
             _mongoDb = mongoDb;
+            RoomManager = roomManager;
         }
 
         protected override TcpSession CreateSession()

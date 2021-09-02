@@ -1,3 +1,4 @@
+using Youtube_GameOnlineServer.Applications.Handlers;
 using Youtube_GameOnlineServer.GameModels.Base;
 
 namespace Youtube_GameOnlineServer.GameModels
@@ -15,7 +16,7 @@ namespace Youtube_GameOnlineServer.GameModels
         {
             Username = username;
             DisplayName = displayName;
-            Password = password;
+            Password = GameHelper.HashPassword(password);
             Avatar = "";
             Level = 1;
             Amount = 0;
