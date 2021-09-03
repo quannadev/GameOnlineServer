@@ -103,6 +103,14 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                         break;
                     case WsTags.RoomInfo:
                         break;
+                    case WsTags.UserInfo:
+                        break;
+                    case WsTags.CreateRoom:
+                        var createRoom = GameHelper.ParseStruct<CreatRoomData>(wsMess.Data.ToString());
+                        this.OnUserCreateRoom(createRoom);
+                        break;
+                    case WsTags.QuickPlay:
+                        break;
                     default:
                         break;
                     //throw new ArgumentOutOfRangeException();
@@ -116,6 +124,15 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             //((WsGameServer) Server).SendAll($"{this.SessionId} send message {mess}");
         }
 
+        private void OnUserCreateRoom(CreatRoomData data)
+        {
+            var room = ((WsGameServer) Server).RoomManager.CreateRoom(data.Time);
+            if (room != null && room.JoinRoom(this))
+            {
+                var lobby = ((WsGameServer) Server).RoomManager.Lobby;
+                lobby.ExitRoom(this);
+            }
+        }
         private void PlayerJoinLobby()
         {
             var lobby = ((WsGameServer) Server).RoomManager.Lobby;
