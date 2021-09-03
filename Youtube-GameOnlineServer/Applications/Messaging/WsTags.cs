@@ -7,7 +7,8 @@ namespace Youtube_GameOnlineServer.Applications.Messaging
         Register,
         UserInfo,
         RoomInfo,
-        Run,
-        Stop
+        LobbyInfo,
+        CreateRoom,
+        QuickPlay
     }
 }

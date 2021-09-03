@@ -1,23 +1,24 @@
 using System.Collections.Concurrent;
 using System.Linq;
+using Youtube_GameOnlineServer.Rooms.Constants;
 using Youtube_GameOnlineServer.Rooms.Interfaces;
 
 namespace Youtube_GameOnlineServer.Rooms.Handlers
 {
     public class RoomManager : IRoomManager
     {
-        public BaseRoom Lobby { get; set; }
+        public Lobby Lobby { get; set; }
         private ConcurrentDictionary<string, BaseRoom> Rooms { get; set; }
 
         public RoomManager()
         {
             Rooms = new ConcurrentDictionary<string, BaseRoom>();
-            Lobby = new BaseRoom();
+            Lobby = new Lobby(RoomType.Lobby);
         }
 
-        public BaseRoom CreateRoom()
+        public BaseRoom CreateRoom(int timer)
         {
-            var newRoom = new BaseRoom();
+            var newRoom = new TictacToeRoom(timer);
             Rooms.TryAdd(newRoom.Id, newRoom);
             return newRoom;
         }
