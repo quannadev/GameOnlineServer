@@ -39,12 +39,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
 
         private void RoomInfo()
         {
-            var lobby = new RoomInfo
-            {
-                RoomType = RoomType,
-                Players = Players.Values.Select(p => p.GetUserInfo()).ToList()
-            };
-            var mess = new WsMessage<RoomInfo>(WsTags.RoomInfo, lobby);
+            var mess = new WsMessage<RoomInfo>(WsTags.RoomInfo, this.GetRoomInfo());
             this.SendMessage(mess);
         }
 
@@ -102,6 +97,16 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
                     player.SendMessage(message);
                 }
             }
+        }
+
+        public RoomInfo GetRoomInfo()
+        {
+            return new()
+            {
+                RoomId = this.Id,
+                RoomType = RoomType,
+                Players = Players.Values.Select(p => p.GetUserInfo()).ToList()
+            };
         }
     }
 }

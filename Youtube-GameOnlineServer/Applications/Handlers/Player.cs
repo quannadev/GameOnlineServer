@@ -111,6 +111,10 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                         break;
                     case WsTags.QuickPlay:
                         break;
+                    case WsTags.JoinRoom:
+                        var roomInfo = GameHelper.ParseStruct<RoomInfoData>(wsMess.Data.ToString());
+                        this.OnUserJoinRoom(roomInfo);
+                        break;
                     default:
                         break;
                     //throw new ArgumentOutOfRangeException();
@@ -131,6 +135,15 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             {
                 var lobby = ((WsGameServer) Server).RoomManager.Lobby;
                 lobby.ExitRoom(this);
+            }
+        }
+
+        private void OnUserJoinRoom(RoomInfoData data)
+        {
+            var room = ((WsGameServer) Server).RoomManager.FindRoom(data.RoomId);
+            if (room != null)
+            {
+                room.JoinRoom(this);
             }
         }
         private void PlayerJoinLobby()
@@ -171,6 +184,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             {
                 return new UserInfo
                 {
+                    Id = this.UserInfo.Id,
                     DisplayName = UserInfo.DisplayName,
                     Amount = UserInfo.Amount,
                     Avatar = UserInfo.Avatar,

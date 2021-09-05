@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using Youtube_GameOnlineServer.Rooms.Constants;
 using Youtube_GameOnlineServer.Rooms.Interfaces;
@@ -13,7 +14,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
         public RoomManager()
         {
             Rooms = new ConcurrentDictionary<string, BaseRoom>();
-            Lobby = new Lobby(RoomType.Lobby);
+            Lobby = new Lobby(RoomType.Lobby, this);
         }
 
         public BaseRoom CreateRoom(int timer)
@@ -28,6 +29,11 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             return Rooms.FirstOrDefault(r => r.Key == id).Value;
         }
 
+        public List<BaseRoom> ListRoom()
+        {
+            return this.Rooms.Values.ToList();
+        }
+
         public bool RemoveRoom(string id)
         {
             var oldRoom = FindRoom(id);
@@ -36,6 +42,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
                 Rooms.TryRemove(id, out var room);
                 return room != null;
             }
+
             return false;
         }
     }
