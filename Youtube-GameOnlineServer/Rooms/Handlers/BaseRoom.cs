@@ -27,9 +27,9 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
 
         public virtual bool JoinRoom(IPlayer player)
         {
-            if (FindPlayer(player.SessionId) == null)
+            if (FindPlayer(player.GetUserInfo().Id) == null)
             {
-                if (Players.TryAdd(player.SessionId, player))
+                if (Players.TryAdd(player.GetUserInfo().Id, player))
                 {
                     this.OwnerId ??= player.GetUserInfo().Id;
                     return true;
@@ -47,7 +47,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
 
         public virtual bool ExitRoom(IPlayer player)
         {
-            return this.ExitRoom(player.SessionId);
+            return this.ExitRoom(player.GetUserInfo().Id);
         }
 
         private void ChangeOwner(PixelType exitPixelType)
@@ -62,7 +62,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             var player = FindPlayer(id);
             if (player != null)
             {
-                Players.TryRemove(player.SessionId, out var playerRemove);
+                Players.TryRemove(player.GetUserInfo().Id, out var playerRemove);
                 if (Players.IsEmpty)
                 {
                     RoomManager.Instance.RemoveRoom(this.Id);

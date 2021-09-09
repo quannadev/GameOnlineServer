@@ -210,8 +210,8 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         {
             //todo logic handle player disconnect
             var lobby = ((WsGameServer) Server).RoomManager.Lobby;
-            lobby.ExitRoom(this);
             this.OnUserExitRoom();
+            lobby.ExitRoom(this);
             _logger.Warning("Player disconnected", null);
             //((WsGameServer) Server).PlayerManager.RemovePlayer(this);
         }

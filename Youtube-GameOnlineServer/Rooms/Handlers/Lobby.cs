@@ -16,20 +16,24 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
         {
             this._roomManager = roomManager;
         }
-        
+
 
         public override bool JoinRoom(IPlayer player)
         {
-            base.JoinRoom(player);
-            this.RoomInfo();
-            this.SendListMatch(player);
-            return true;
+            if (base.JoinRoom(player))
+            {
+                this.RoomInfo();
+                this.SendListMatch(player);
+                return true;
+            }
+            return false;
         }
 
         public void SendListMatch(IPlayer player = null)
         {
             var listRoom = this._roomManager.ListRoom();
-            var message = new WsMessage<List<RoomInfo>>(WsTags.ListRooms, listRoom.Select(item => item.GetRoomInfo()).ToList());
+            var message =
+                new WsMessage<List<RoomInfo>>(WsTags.ListRooms, listRoom.Select(item => item.GetRoomInfo()).ToList());
             if (player != null)
             {
                 player.SendMessage(message);
@@ -38,7 +42,6 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             {
                 this.SendMessage(message);
             }
-            
         }
     }
 }
