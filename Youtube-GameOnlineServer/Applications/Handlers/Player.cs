@@ -9,7 +9,10 @@ using Youtube_GameOnlineServer.Applications.Messaging;
 using Youtube_GameOnlineServer.Applications.Messaging.Constants;
 using Youtube_GameOnlineServer.GameModels;
 using Youtube_GameOnlineServer.GameModels.Handlers;
+using Youtube_GameOnlineServer.GameTiktaktoe.Constants;
+using Youtube_GameOnlineServer.GameTiktaktoe.Room;
 using Youtube_GameOnlineServer.Logging;
+using Youtube_GameOnlineServer.Rooms.Handlers;
 
 namespace Youtube_GameOnlineServer.Applications.Handlers
 {
@@ -21,6 +24,10 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         private readonly IGameLogger _logger;
         private UserHandler UsersDb { get; set; }
         private User UserInfo { get; set; }
+        private TiktakToeRoom CurrentRoom { get; set; }
+
+        private PixelType PixelType { get; set; }
+
 
         public Player(WsServer server, IMongoDatabase database) : base(server)
         {
@@ -82,6 +89,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                             this.SendMessage(GameHelper.ParseString(invalidMess));
                             return;
                         }
+
                         var check = UsersDb.FindByUserName(regData.Username);
                         if (check != null)
                         {
@@ -90,7 +98,6 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                             return;
                         }
 
-                       
 
                         var newUser = new User(regData.Username, regData.Password, regData.DisplayName);
                         UserInfo = UsersDb.Create(newUser);
@@ -114,6 +121,9 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                     case WsTags.JoinRoom:
                         var roomInfo = GameHelper.ParseStruct<RoomInfoData>(wsMess.Data.ToString());
                         this.OnUserJoinRoom(roomInfo);
+                        break;
+                    case WsTags.ExitRoom:
+                        this.OnUserExitRoom();
                         break;
                     default:
                         break;
@@ -141,11 +151,17 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         private void OnUserJoinRoom(RoomInfoData data)
         {
             var room = ((WsGameServer) Server).RoomManager.FindRoom(data.RoomId);
-            if (room != null)
+            if (room != null && room.JoinRoom(this))
             {
-                room.JoinRoom(this);
+                this.CurrentRoom = (TiktakToeRoom) room;
             }
         }
+
+        private void OnUserExitRoom()
+        {
+            CurrentRoom?.ExitRoom(this);
+        }
+
         private void PlayerJoinLobby()
         {
             var lobby = ((WsGameServer) Server).RoomManager.Lobby;
@@ -189,10 +205,21 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                     Amount = UserInfo.Amount,
                     Avatar = UserInfo.Avatar,
                     Level = UserInfo.Level,
+                    PixelType = this.PixelType
                 };
             }
 
             return new UserInfo();
+        }
+
+        public void SetPixelType(PixelType type)
+        {
+            this.PixelType = type;
+        }
+
+        public PixelType GetPixelType()
+        {
+            return this.PixelType;
         }
     }
 }

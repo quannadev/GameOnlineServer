@@ -1,5 +1,6 @@
 using Youtube_GameOnlineServer.Applications.Messaging;
 using Youtube_GameOnlineServer.Applications.Messaging.Constants;
+using Youtube_GameOnlineServer.GameTiktaktoe.Constants;
 
 namespace Youtube_GameOnlineServer.Applications.Interfaces
 {
@@ -12,5 +13,7 @@ namespace Youtube_GameOnlineServer.Applications.Interfaces
         bool SendMessage<T>(WsMessage<T> message);
         void OnDisconnect();
         UserInfo GetUserInfo();
+        void SetPixelType(PixelType type);
+        PixelType GetPixelType();
     }
 }

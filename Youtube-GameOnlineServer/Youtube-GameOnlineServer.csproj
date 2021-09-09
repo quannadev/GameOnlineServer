@@ -36,4 +36,9 @@
       <ProjectReference Include="..\GameDatabase\GameDatabase.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="GameTiktaktoe\Handlers" />
+      <Folder Include="GameTiktaktoe\Interfaces" />
+    </ItemGroup>
+
 </Project>

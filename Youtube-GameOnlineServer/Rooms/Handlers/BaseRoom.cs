@@ -5,6 +5,7 @@ using Youtube_GameOnlineServer.Applications.Handlers;
 using Youtube_GameOnlineServer.Applications.Interfaces;
 using Youtube_GameOnlineServer.Applications.Messaging;
 using Youtube_GameOnlineServer.Applications.Messaging.Constants;
+using Youtube_GameOnlineServer.GameTiktaktoe.Constants;
 using Youtube_GameOnlineServer.Rooms.Constants;
 using Youtube_GameOnlineServer.Rooms.Interfaces;
 
@@ -15,8 +16,9 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
         public string Id { get; set; }
         public RoomType RoomType { get; set; }
         public ConcurrentDictionary<string, IPlayer> Players { get; set; }
+        protected string OwnerId { get; set; }
 
-        public BaseRoom(RoomType type)
+        protected BaseRoom(RoomType type)
         {
             RoomType = type;
             Id = GameHelper.RandomString(10);
@@ -29,7 +31,10 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             {
                 if (Players.TryAdd(player.SessionId, player))
                 {
-                    this.RoomInfo();
+                    if (this.OwnerId == string.Empty)
+                    {
+                        this.OwnerId = player.GetUserInfo().Id;
+                    }
                     return true;
                 }
             }
@@ -37,7 +42,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             return false;
         }
 
-        private void RoomInfo()
+        public void RoomInfo()
         {
             var mess = new WsMessage<RoomInfo>(WsTags.RoomInfo, this.GetRoomInfo());
             this.SendMessage(mess);
@@ -48,13 +53,31 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             return this.ExitRoom(player.SessionId);
         }
 
+        private void ChangeOwner(PixelType exitPixelType)
+        {
+            var player = Players.Values.ToList()[0];
+            OwnerId = player.GetUserInfo().Id;
+            player.SetPixelType(exitPixelType);
+        }
+
         public virtual bool ExitRoom(string id)
         {
             var player = FindPlayer(id);
             if (player != null)
             {
-                Players.TryRemove(player.SessionId, out player);
-                this.RoomInfo();
+                Players.TryRemove(player.SessionId, out var playerRemove);
+                if (Players.IsEmpty)
+                {
+                    RoomManager.Instance.RemoveRoom(this.Id);
+                    return true;
+                }
+
+                if (player.GetUserInfo().Id == OwnerId)
+                {
+                    this.ChangeOwner(player.GetPixelType());
+                }
+
+                
                 return true;
             }
 
@@ -105,6 +128,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             {
                 RoomId = this.Id,
                 RoomType = RoomType,
+                OwnerId = OwnerId,
                 Players = Players.Values.Select(p => p.GetUserInfo()).ToList()
             };
         }

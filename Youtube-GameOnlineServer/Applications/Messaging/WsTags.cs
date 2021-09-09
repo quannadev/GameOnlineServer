@@ -11,6 +11,10 @@ namespace Youtube_GameOnlineServer.Applications.Messaging
         CreateRoom,
         QuickPlay,
         ListRooms,
-        JoinRoom
+        JoinRoom,
+        ExitRoom,
+        StartGame,
+        SetBlock,
+        Turn
     }
 }
