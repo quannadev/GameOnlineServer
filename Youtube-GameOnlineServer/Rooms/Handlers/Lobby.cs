@@ -16,15 +16,29 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
         {
             this._roomManager = roomManager;
         }
-
+        
 
         public override bool JoinRoom(IPlayer player)
         {
             base.JoinRoom(player);
+            this.RoomInfo();
+            this.SendListMatch(player);
+            return true;
+        }
+
+        public void SendListMatch(IPlayer player = null)
+        {
             var listRoom = this._roomManager.ListRoom();
             var message = new WsMessage<List<RoomInfo>>(WsTags.ListRooms, listRoom.Select(item => item.GetRoomInfo()).ToList());
-            player.SendMessage(message);
-            return true;
+            if (player != null)
+            {
+                player.SendMessage(message);
+            }
+            else
+            {
+                this.SendMessage(message);
+            }
+            
         }
     }
 }

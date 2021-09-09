@@ -15,6 +15,7 @@ namespace Youtube_GameOnlineServer.Applications.Messaging
         ExitRoom,
         StartGame,
         SetBlock,
-        Turn
+        Turn,
+        GameInfo
     }
 }

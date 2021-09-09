@@ -20,12 +20,14 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
         private string CurrentTurn { get; set; }
         private Timer TurnTimer { get; set; }
         private string TurnId { get; set; }
+        private int Turn { get; set; }
 
         public TiktakToeRoom(int time = 10) : base(RoomType.Battle)
         {
             _time = time;
             this.Board = new List<List<int>>();
             MatchStatus = MatchStatus.Init;
+            this.Turn = 0;
         }
 
         public override bool JoinRoom(IPlayer player)
@@ -34,18 +36,26 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
             player.SetPixelType(player.GetUserInfo().Id == this.OwnerId ? PixelType.X : PixelType.O);
             this.RoomInfo();
             return true;
-
         }
 
         private void SetTurn()
         {
-            if (this.CurrentTurn != string.Empty)
+            this.Turn += 1;
+            if (this.CurrentTurn != null)
             {
                 var nextPlayer = this.Players.FirstOrDefault(p => p.Key != CurrentTurn).Value;
                 if (nextPlayer != null)
                 {
-                    this.CurrentTurn = nextPlayer.SessionId;
+                    this.CurrentTurn = nextPlayer.GetUserInfo().Id;
                     this.TurnId = GameHelper.RandomString(20);
+                    var message = new WsMessage<TurnData>(WsTags.Turn, new TurnData
+                    {
+                        Id = this.TurnId,
+                        PlayerId = this.CurrentTurn,
+                        TimerCount = _time,
+                        Turn = Turn
+                    });
+                    this.SendMessage(message);
                     this.OnProcessTurn();
                     return;
                 }
@@ -56,19 +66,20 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
             if (nextPlayerRnd % 2 == 0)
             {
                 var nextPlayer = this.Players.Values.ToList()[0];
-                this.CurrentTurn = nextPlayer.SessionId;
+                this.CurrentTurn = nextPlayer.GetUserInfo().Id;
             }
             else
             {
                 var nextPlayer = this.Players.Values.ToList()[1];
-                this.CurrentTurn = nextPlayer.SessionId;
+                this.CurrentTurn = nextPlayer.GetUserInfo().Id;
             }
             this.TurnId = GameHelper.RandomString(20);
             var messageTurn = new WsMessage<TurnData>(WsTags.Turn, new TurnData
             {
                 Id = this.TurnId,
                 PlayerId = this.CurrentTurn,
-                TimerCount = _time
+                TimerCount = _time,
+                Turn = Turn
             });
             this.SendMessage(messageTurn);
             this.OnProcessTurn();
@@ -138,13 +149,18 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
             }
 
             MatchStatus = MatchStatus.Start;
+            var message = new WsMessage<GameInfoData>(WsTags.GameInfo, new GameInfoData()
+            {
+                Status = MatchStatus,
+                TimeCount = _time
+            });
+            this.SendMessage(message);
             this.SetTurn();
         }
 
         public override bool ExitRoom(IPlayer player)
         {
             base.ExitRoom(player);
-
             this.RoomInfo();
             return true;
         }

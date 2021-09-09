@@ -125,6 +125,9 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                     case WsTags.ExitRoom:
                         this.OnUserExitRoom();
                         break;
+                    case WsTags.StartGame:
+                        this.OnUserStartGame();
+                        break;
                     default:
                         break;
                     //throw new ArgumentOutOfRangeException();
@@ -138,28 +141,46 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             //((WsGameServer) Server).SendAll($"{this.SessionId} send message {mess}");
         }
 
+        private void OnUserStartGame()
+        {
+            if (CurrentRoom == null)
+            {
+                return;
+            }
+            CurrentRoom.StartGame(this);
+        }
+
         private void OnUserCreateRoom(CreatRoomData data)
         {
-            var room = ((WsGameServer) Server).RoomManager.CreateRoom(data.Time);
+            var room =  (TiktakToeRoom)((WsGameServer) Server).RoomManager.CreateRoom(data.Time);
             if (room != null && room.JoinRoom(this))
             {
                 var lobby = ((WsGameServer) Server).RoomManager.Lobby;
                 lobby.ExitRoom(this);
+                lobby.SendListMatch();
+                CurrentRoom = room;
             }
         }
 
         private void OnUserJoinRoom(RoomInfoData data)
         {
-            var room = ((WsGameServer) Server).RoomManager.FindRoom(data.RoomId);
+            var room = (TiktakToeRoom)((WsGameServer) Server).RoomManager.FindRoom(data.RoomId);
             if (room != null && room.JoinRoom(this))
             {
-                this.CurrentRoom = (TiktakToeRoom) room;
+                this.CurrentRoom = room;
             }
         }
 
         private void OnUserExitRoom()
         {
-            CurrentRoom?.ExitRoom(this);
+            if (CurrentRoom == null)
+            {
+                return;
+            }
+            if (CurrentRoom.ExitRoom(this))
+            {
+                this.PlayerJoinLobby();
+            }
         }
 
         private void PlayerJoinLobby()
@@ -190,6 +211,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             //todo logic handle player disconnect
             var lobby = ((WsGameServer) Server).RoomManager.Lobby;
             lobby.ExitRoom(this);
+            this.OnUserExitRoom();
             _logger.Warning("Player disconnected", null);
             //((WsGameServer) Server).PlayerManager.RemovePlayer(this);
         }

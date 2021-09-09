@@ -31,10 +31,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             {
                 if (Players.TryAdd(player.SessionId, player))
                 {
-                    if (this.OwnerId == string.Empty)
-                    {
-                        this.OwnerId = player.GetUserInfo().Id;
-                    }
+                    this.OwnerId ??= player.GetUserInfo().Id;
                     return true;
                 }
             }
@@ -76,8 +73,6 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
                 {
                     this.ChangeOwner(player.GetPixelType());
                 }
-
-                
                 return true;
             }
 

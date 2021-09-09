@@ -5,5 +5,6 @@ namespace Youtube_GameOnlineServer.Applications.Messaging.Constants.Match
         public string Id { get; set; }
         public string PlayerId { get; set; }
         public int TimerCount { get; set; }
+        public int Turn { get; set; }
     }
 }

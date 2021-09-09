@@ -43,6 +43,7 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
             if (oldRoom != null)
             {
                 Rooms.TryRemove(id, out var room);
+                this.Lobby.SendListMatch();
                 return room != null;
             }
 
