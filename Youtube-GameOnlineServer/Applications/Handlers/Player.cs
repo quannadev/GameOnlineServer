@@ -7,6 +7,7 @@ using NetCoreServer;
 using Youtube_GameOnlineServer.Applications.Interfaces;
 using Youtube_GameOnlineServer.Applications.Messaging;
 using Youtube_GameOnlineServer.Applications.Messaging.Constants;
+using Youtube_GameOnlineServer.Applications.Messaging.Constants.Match;
 using Youtube_GameOnlineServer.GameModels;
 using Youtube_GameOnlineServer.GameModels.Handlers;
 using Youtube_GameOnlineServer.GameTiktaktoe.Constants;
@@ -128,6 +129,9 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
                     case WsTags.StartGame:
                         this.OnUserStartGame();
                         break;
+                    case WsTags.SetPlace:
+                        this.CurrentRoom?.SetPlace(this, GameHelper.ParseStruct<PlaceData>(wsMess.Data.ToString()));
+                        break;
                     default:
                         break;
                     //throw new ArgumentOutOfRangeException();
@@ -147,12 +151,13 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             {
                 return;
             }
+
             CurrentRoom.StartGame(this);
         }
 
         private void OnUserCreateRoom(CreatRoomData data)
         {
-            var room =  (TiktakToeRoom)((WsGameServer) Server).RoomManager.CreateRoom(data.Time);
+            var room = (TiktakToeRoom) ((WsGameServer) Server).RoomManager.CreateRoom(data.Time);
             if (room != null && room.JoinRoom(this))
             {
                 var lobby = ((WsGameServer) Server).RoomManager.Lobby;
@@ -164,7 +169,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
 
         private void OnUserJoinRoom(RoomInfoData data)
         {
-            var room = (TiktakToeRoom)((WsGameServer) Server).RoomManager.FindRoom(data.RoomId);
+            var room = (TiktakToeRoom) ((WsGameServer) Server).RoomManager.FindRoom(data.RoomId);
             if (room != null && room.JoinRoom(this))
             {
                 this.CurrentRoom = room;
@@ -177,6 +182,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             {
                 return;
             }
+
             if (CurrentRoom.ExitRoom(this))
             {
                 this.PlayerJoinLobby();

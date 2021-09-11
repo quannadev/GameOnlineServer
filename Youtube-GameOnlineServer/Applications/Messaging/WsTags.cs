@@ -14,7 +14,7 @@ namespace Youtube_GameOnlineServer.Applications.Messaging
         JoinRoom,
         ExitRoom,
         StartGame,
-        SetBlock,
+        SetPlace,
         Turn,
         GameInfo
     }
