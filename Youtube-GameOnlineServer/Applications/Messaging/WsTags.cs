@@ -16,6 +16,7 @@ namespace Youtube_GameOnlineServer.Applications.Messaging
         StartGame,
         SetPlace,
         Turn,
-        GameInfo
+        GameInfo,
+        GameOver
     }
 }

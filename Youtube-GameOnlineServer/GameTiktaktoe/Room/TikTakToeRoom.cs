@@ -49,6 +49,16 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
             }
         }
 
+        private void ResetMatch()
+        {
+            this.InitBoard();
+            this.CurrentTurn = "";
+            this.Turn = 0;
+            this.MatchStatus = MatchStatus.Init;
+            this.TurnTimer = null;
+            this.TurnId = "";
+        }
+
         public override bool JoinRoom(IPlayer player)
         {
             if (!base.JoinRoom(player)) return false;
@@ -137,7 +147,7 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
                 player.SendMessage(invalidMess);
                 return;
             }
-
+        
             //todo check position block row, coll
 
 
@@ -153,13 +163,13 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
                 return;
             }
 
-            if (this.MatchStatus != MatchStatus.Init)
+            if (this.MatchStatus == MatchStatus.Start)
             {
-                invalidMess.Data = "Phòng này đang chơi hoặc đã kết thúc";
+                invalidMess.Data = "Phòng này đang chơi";
                 player.SendMessage(invalidMess);
                 return;
             }
-
+            
             if (this.Players.Count < 2)
             {
                 invalidMess.Data = "Phòng phải có 2 người";
@@ -167,7 +177,7 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
                 return;
             }
 
-            this.InitBoard();
+            this.ResetMatch();
             MatchStatus = MatchStatus.Start;
             var message = new WsMessage<GameInfoData>(WsTags.GameInfo, new GameInfoData()
             {
@@ -216,121 +226,169 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
             var gameOver = this.CheckGameOver(data);
             if (gameOver)
             {
-                Logger.Print("Game Over");
-                invalidMess.Data = "Game Over";
-                this.SendMessage(invalidMess);
-                //todo end match
+                this.GameOver(player.GetUserInfo().Id);
                 return;
             }
 
             SetTurn();
         }
 
+        private void GameOver(string winnerId)
+        {
+            Logger.Print("Game Over");
+            MatchStatus = MatchStatus.GameOver;
+            this.TurnTimer?.Dispose();
+            //todo end match
+            var endMatchData = new EndMatchData
+            {
+                WinnerId = winnerId,
+                Point = 10
+            };
+            var mes = new WsMessage<EndMatchData>(WsTags.GameOver, endMatchData);
+            this.SendMessage(mes);
+        }
+
         private bool CheckGameOver(PlaceData data)
         {
-            //Check row
-            var pixelCount = 0;
-            for (var row = data.Row - 1; row >= 0; row--)
+            try
             {
-                if (this.Board[row][data.Col] != data.PixelType)
+                //Check row
+                var pixelCount = 1;
+                for (var row = data.Row - 1; row >= 0; row--)
                 {
-                    break;
+                    if (this.Board[row][data.Col] != data.PixelType)
+                    {
+                        break;
+                    }
+
+                    pixelCount++;
                 }
 
-                pixelCount++;
-            }
-
-            if (pixelCount >= 4)
-            {
-                return true;
-            }
-
-            //Check col
-            pixelCount = 0;
-            for (var col = data.Col - 1; col >= 0; col--)
-            {
-                if (this.Board[data.Row][col] != data.PixelType)
+                if (pixelCount >= 5)
                 {
-                    break;
+                    return true;
                 }
 
-                pixelCount++;
-            }
-
-            if (pixelCount >= 4)
-            {
-                return true;
-            }
-
-            //check all row
-            pixelCount = 1;
-            for (var row = 0; row < 10; row++)
-            {
-                if (this.Board[row][data.Col] != data.PixelType)
+                //Check col
+                pixelCount = 0;
+                for (var col = data.Col - 1; col >= 0; col--)
                 {
-                    break;
+                    if (this.Board[data.Row][col] != data.PixelType)
+                    {
+                        break;
+                    }
+
+                    pixelCount++;
                 }
 
-                pixelCount++;
-            }
-
-            if (pixelCount >= 5)
-            {
-                return true;
-            }
-
-            //check all col
-            pixelCount = 1;
-            for (var col = 0; col < 10; col++)
-            {
-                if (this.Board[data.Row][col] != data.PixelType)
+                if (pixelCount >= 5)
                 {
-                    break;
+                    return true;
                 }
 
-                pixelCount++;
-            }
-
-            if (pixelCount >= 5)
-            {
-                return true;
-            }
-
-            //check diagonal right to left
-            pixelCount = 1;
-            for (int col = data.Col - 1, row = data.Row + 1; col is >= 0 and < 10; col--, row++)
-            {
-                if (this.Board[row][col] != data.PixelType)
+                //check all row
+                pixelCount = 1;
+                for (var row = 0; row < 10; row++)
                 {
-                    break;
+                    if (this.Board[row][data.Col] != data.PixelType)
+                    {
+                        break;
+                    }
+
+                    pixelCount++;
                 }
 
-                pixelCount++;
-            }
-
-            if (pixelCount >= 5)
-            {
-                return true;
-            }
-
-            //check diagonal right to left
-            pixelCount = 1;
-            for (int col = data.Col + 1, row = data.Row - 1; col is >= 0 and < 10; col++, row--)
-            {
-                if (this.Board[row][col] != data.PixelType)
+                if (pixelCount >= 5)
                 {
-                    break;
+                    return true;
                 }
 
-                pixelCount++;
-            }
+                //check all col
+                pixelCount = 1;
+                for (var col = 0; col < 10; col++)
+                {
+                    if (this.Board[data.Row][col] != data.PixelType)
+                    {
+                        break;
+                    }
 
-            if (pixelCount >= 5)
+                    pixelCount++;
+                }
+
+                if (pixelCount >= 5)
+                {
+                    return true;
+                }
+
+                //check diagonal right to left
+                pixelCount = 1;
+                for (int col = data.Col - 1, row = data.Row + 1; col is >= 0 and < 10; col--, row++)
+                {
+                    if (this.Board[row][col] != data.PixelType)
+                    {
+                        break;
+                    }
+
+                    pixelCount++;
+                }
+
+                if (pixelCount >= 5)
+                {
+                    return true;
+                }
+
+                //check diagonal right to left
+                pixelCount = 1;
+                for (int col = data.Col + 1, row = data.Row - 1; col is >= 0 and < 10; col++, row--)
+                {
+                    if (this.Board[row][col] != data.PixelType)
+                    {
+                        break;
+                    }
+
+                    pixelCount++;
+                }
+
+                if (pixelCount >= 5)
+                {
+                    return true;
+                }
+
+                pixelCount = 1;
+                for (int col = data.Col - 1, row = data.Row - 1; col >= 0 && row >= 0; col--, row--)
+                {
+                    if (this.Board[row][col] != data.PixelType)
+                    {
+                        break;
+                    }
+
+                    pixelCount++;
+                }
+                if (pixelCount >= 5)
+                {
+                    return true;
+                }
+                pixelCount = 1;
+                for (int col = data.Col + 1, row = data.Row + 1; col < 10 && row < 10; col++, row++)
+                {
+                    if (this.Board[row][col] != data.PixelType)
+                    {
+                        break;
+                    }
+
+                    pixelCount++;
+                }
+                if (pixelCount >= 5)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
             {
-                return true;
+               Logger.Error(e.Message, e);
+               return false;
             }
-
-            return false;
         }
     }
 }
