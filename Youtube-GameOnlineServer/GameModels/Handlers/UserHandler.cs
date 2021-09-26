@@ -27,6 +27,17 @@ namespace Youtube_GameOnlineServer.GameModels.Handlers
             return _userDb.GetAll();
         }
 
+        public List<User> GetTop(int limit)
+        {
+            var filter = Builders<User>.Filter
+                .Gt(i => i.Point, 0);
+            var list = _userDb.GetCollection()
+                .Find(filter)
+                .Limit(limit)
+                .SortByDescending(u => u.Point);
+            return list.ToList();
+        }
+
         public User FindByUserName(string username)
         {
             var filter = Builders<User>.Filter.Eq(i => i.Username, username);
@@ -48,6 +59,7 @@ namespace Youtube_GameOnlineServer.GameModels.Handlers
                 .Set(i => i.Amount, item.Amount)
                 .Set(i => i.Level, item.Level)
                 .Set(i => i.Avatar, item.Avatar)
+                .Set(i => i.Point, item.Point)
                 .Set(i => i.UpdateAt, DateTime.Now);
             _userDb.Update(filter, updater);
             return item;

@@ -11,6 +11,7 @@ namespace Youtube_GameOnlineServer.GameModels
         public string Avatar { get; set; }
         public int Level { get; set; }
         public long Amount { get; set; }
+        public long Point { get; set; }
 
         public User(string username, string password, string displayName)
         {
@@ -20,6 +21,7 @@ namespace Youtube_GameOnlineServer.GameModels
             Avatar = "";
             Level = 1;
             Amount = 0;
+            Point = 0;
         }
     }
 }

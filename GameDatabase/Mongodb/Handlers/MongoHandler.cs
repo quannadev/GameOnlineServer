@@ -21,7 +21,8 @@ namespace GameDatabase.Mongodb.Handlers
                 case "User":
                     Collection = _database.GetCollection<T>("Users");
                     break;
-                case "Room":
+                case "RoomModel":
+                    Collection = _database.GetCollection<T>("Match");
                     break;
             }
         }
@@ -31,9 +32,9 @@ namespace GameDatabase.Mongodb.Handlers
             return _database;
         }
 
-        public IMongoCollection<T> GetCollection(string colName)
+        public IMongoCollection<T> GetCollection()
         {
-            return _database.GetCollection<T>(colName);
+            return Collection;
         }
 
         public T Get(FilterDefinition<T> filter)

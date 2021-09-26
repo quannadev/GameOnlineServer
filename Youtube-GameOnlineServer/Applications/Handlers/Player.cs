@@ -13,7 +13,6 @@ using Youtube_GameOnlineServer.GameModels.Handlers;
 using Youtube_GameOnlineServer.GameTiktaktoe.Constants;
 using Youtube_GameOnlineServer.GameTiktaktoe.Room;
 using Youtube_GameOnlineServer.Logging;
-using Youtube_GameOnlineServer.Rooms.Handlers;
 
 namespace Youtube_GameOnlineServer.Applications.Handlers
 {
@@ -172,6 +171,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             var room = (TiktakToeRoom) ((WsGameServer) Server).RoomManager.FindRoom(data.RoomId);
             if (room != null && room.JoinRoom(this))
             {
+                this.PlayerExitLobby();
                 this.CurrentRoom = room;
             }
         }
@@ -185,6 +185,7 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
 
             if (CurrentRoom.ExitRoom(this))
             {
+                CurrentRoom = null;
                 this.PlayerJoinLobby();
             }
         }
@@ -195,7 +196,12 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
             lobby.JoinRoom(this);
             //todo logic join lobby
         }
-
+        private void PlayerExitLobby()
+        {
+            var lobby = ((WsGameServer) Server).RoomManager.Lobby;
+            lobby.ExitRoom(this);
+            //todo logic join lobby
+        }
         public void SetDisconnect(bool value)
         {
             this.IsDisconnected = value;
@@ -248,6 +254,12 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         public PixelType GetPixelType()
         {
             return this.PixelType;
+        }
+
+        public void UpdatePoint(int point)
+        {
+            this.UserInfo.Point += point;
+            this.UsersDb.Update(this.UserInfo.Id, this.UserInfo);
         }
     }
 }

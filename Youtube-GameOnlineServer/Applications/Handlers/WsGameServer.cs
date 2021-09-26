@@ -16,7 +16,8 @@ namespace Youtube_GameOnlineServer.Applications.Handlers
         private readonly IGameLogger _logger;
         private readonly MongoDb _mongoDb;
         public readonly IRoomManager RoomManager;
-        public WsGameServer(IPAddress address, int port, IPlayerManager playerManager, IGameLogger logger, MongoDb mongoDb, IRoomManager roomManager) : base(address, port)
+        public WsGameServer(IPAddress address, int port, IPlayerManager playerManager, IGameLogger logger,
+            MongoDb mongoDb, IRoomManager roomManager) : base(address, port)
         {
             _port = port;
             _playerManager = playerManager;

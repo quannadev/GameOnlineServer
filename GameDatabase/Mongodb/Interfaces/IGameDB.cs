@@ -6,7 +6,7 @@ namespace GameDatabase.Mongodb.Interfaces
     public interface IGameDb<T> where T : class
     {
         IMongoDatabase GetDatabase();
-        IMongoCollection<T> GetCollection(string name);
+        IMongoCollection<T> GetCollection();
         T Get(FilterDefinition<T> filter);
         List<T> GetAll();
         T Create(T item);

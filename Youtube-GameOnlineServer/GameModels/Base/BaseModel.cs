@@ -9,12 +9,8 @@ namespace Youtube_GameOnlineServer.GameModels.Base
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-        
-        
-        
         public DateTime CreatedAt { get; set; }
         public DateTime UpdateAt { get; set; }
-
         public BaseModel()
         {
             CreatedAt = DateTime.Now;

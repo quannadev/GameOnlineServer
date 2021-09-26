@@ -35,7 +35,7 @@ namespace Youtube_GameOnlineServer.Logging
 
         public void Error(string error, Exception exception)
         {
-            _logger.Error(error, exception);
+            _logger.Error($"{error}\n{exception.Message}", exception);
         }
 
         public void Error(string error)

@@ -17,7 +17,7 @@ namespace Youtube_GameOnlineServer
             IGameLogger logger = new GameLogger();
             var mongodb = new MongoDb();
             IPlayerManager playerManager = new PlayersManager(logger);
-            IRoomManager roomManager = new RoomManager();
+            IRoomManager roomManager = new RoomManager(mongodb.GetDatabase());
             var wsServer = new WsGameServer(IPAddress.Any, 8080, playerManager, logger, mongodb, roomManager);
             wsServer.StartServer();
             logger.Print("Game Server started");

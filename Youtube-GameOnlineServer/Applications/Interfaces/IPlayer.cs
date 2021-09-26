@@ -15,5 +15,6 @@ namespace Youtube_GameOnlineServer.Applications.Interfaces
         UserInfo GetUserInfo();
         void SetPixelType(PixelType type);
         PixelType GetPixelType();
+        void UpdatePoint(int point);
     }
 }

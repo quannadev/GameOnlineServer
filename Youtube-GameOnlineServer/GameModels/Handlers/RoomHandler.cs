@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GameDatabase.Mongodb.Handlers;
 using GameDatabase.Mongodb.Interfaces;
@@ -17,27 +18,42 @@ namespace Youtube_GameOnlineServer.GameModels.Handlers
 
         public RoomModel Find(string id)
         {
-            throw new System.NotImplementedException();
+            var filter = Builders<RoomModel>.Filter.Eq(i => i.Id, id);
+            return _roomDb.Get(filter);
+        }
+
+        public RoomModel FindByRoomId(string rId)
+        {
+            var filter = Builders<RoomModel>.Filter.Eq(i => i.RoomId, rId);
+            return _roomDb.Get(filter);
         }
 
         public List<RoomModel> FindAll()
         {
-            throw new System.NotImplementedException();
+            return _roomDb.GetAll();
         }
 
         public RoomModel Create(RoomModel item)
         {
-            throw new System.NotImplementedException();
+            var room = _roomDb.Create(item);
+            return room;
         }
 
         public RoomModel Update(string id, RoomModel item)
         {
-            throw new System.NotImplementedException();
+            var filter = Builders<RoomModel>.Filter.Eq(i => i.Id, id);
+            var updater = Builders<RoomModel>.Update
+                .Set(i => i.Players, item.Players)
+                .Set(i => i.Match, item.Match)
+                .Set(i => i.UpdateAt, DateTime.Now);
+            _roomDb.Update(filter, updater);
+            return item;
         }
 
         public void Remove(string id)
         {
-            throw new System.NotImplementedException();
+            var filter = Builders<RoomModel>.Filter.Eq(i => i.Id, id);
+            _roomDb.Remove(filter);
         }
     }
 }

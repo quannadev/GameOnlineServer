@@ -52,31 +52,30 @@ namespace Youtube_GameOnlineServer.Rooms.Handlers
 
         private void ChangeOwner(PixelType exitPixelType)
         {
+            if (this.Players.Count <= 0) return;
             var player = Players.Values.ToList()[0];
             OwnerId = player.GetUserInfo().Id;
             player.SetPixelType(exitPixelType);
+
         }
 
         public virtual bool ExitRoom(string id)
         {
             var player = FindPlayer(id);
-            if (player != null)
+            if (player == null) return false;
+            Players.TryRemove(player.GetUserInfo().Id, out var playerRemove);
+            if (Players.IsEmpty)
             {
-                Players.TryRemove(player.GetUserInfo().Id, out var playerRemove);
-                if (Players.IsEmpty)
-                {
-                    RoomManager.Instance.RemoveRoom(this.Id);
-                    return true;
-                }
-
-                if (player.GetUserInfo().Id == OwnerId)
-                {
-                    this.ChangeOwner(player.GetPixelType());
-                }
+                RoomManager.Instance.RemoveRoom(this.Id);
                 return true;
             }
 
-            return false;
+            if (player.GetUserInfo().Id == OwnerId)
+            {
+                this.ChangeOwner(player.GetPixelType());
+            }
+            return true;
+
         }
 
         public virtual IPlayer FindPlayer(string id)
