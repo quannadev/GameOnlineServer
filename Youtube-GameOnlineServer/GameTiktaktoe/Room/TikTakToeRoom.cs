@@ -34,7 +34,7 @@ namespace Youtube_GameOnlineServer.GameTiktaktoe.Room
         {
             _logger = new GameLogger();
             _roomHandler = roomHandler;
-            _time = 2;
+            _time = time;
             this.Board = new List<List<PixelType>>();
             MatchStatus = MatchStatus.Init;
             this.Turn = 0;
